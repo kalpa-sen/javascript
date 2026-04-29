@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Apna Study Lab | AI Study Intelligence Suite</title>
+    <!-- Google Fonts & Font Awesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f0f4f9;
+            color: #0a1c2f;
+            transition: background 0.25s ease;
+            min-height: 100vh;
+        }
+
+        /* Dynamic difficulty theming */
+        body.theme-low { background: linear-gradient(135deg, #eef6f0 0%, #e2f0e4 100%); }
+        body.theme-medium { background: linear-gradient(135deg, #fff8ed 0%, #fef3e2 100%); }
+        body.theme-tuff { background: linear-gradient(135deg, #fef2ef 0%, #fce8e2 100%); }
+
+        .app-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 28px 32px 40px;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 32px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(0,0,0,0.06);
+        }
+        .logo-area h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, #1e3a5f, #2c6280);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .logo-area p {
+            font-size: 0.8rem;
+            color: #475569;
+            margin-top: 4px;
+            font-weight: 500;
+        }
+        .status-chip {
+            background: rgba(30, 58, 95, 0.08);
+            backdrop-filter: blur(4px);
+            padding: 8px 20px;
+            border-radius: 100px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 500;
+            font-size: 0.85rem;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        .pulse-dot {
+            width: 10px;
+            height: 10px;
+            background: #10b981;
+            border-radius: 50%;
+            box-shadow: 0 0 0 0 rgba(16,185,129,0.5);
+            animation: pulse-ring 1.8s infinite;
+        }
+        @keyframes pulse-ring { 0% { transform: scale(0.8); opacity: 0.6; } 70% { transform: scale(1.2); opacity: 0; } 100% { transform: scale(0.8); opacity: 0; } }
+
+        /* Grid Layout */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 0.9fr;
+            gap: 28px;
+            margin-bottom: 28px;
+        }
+        @media (max-width: 1300px) { .dashboard-grid { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 850px) { .dashboard-grid { grid-template-columns: 1fr; } }
+
+        .card {
+            background: rgba(255,255,255,0.96);
+            backdrop-filter: blur(0px);
+            border-radius: 28px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.03), 0 1px 2px rgba(0,0,0,0.03);
+            border: 1px solid rgba(0,0,0,0.05);
+            padding: 24px 26px;
+            transition: transform 0.1s ease, box-shadow 0.2s;
+        }
+        .card:hover { box-shadow: 0 20px 35px -12px rgba(0,0,0,0.08); }
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 22px;
+            font-weight: 600;
+            font-size: 1.25rem;
+            border-left: 4px solid #2c6280;
+            padding-left: 16px;
+        }
+        .card-header i { color: #2c6280; font-size: 1.3rem; }
+
+        /* Form styling */
+        .input-field {
+            margin-bottom: 18px;
+        }
+        .input-field label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #475569;
+            display: block;
+            margin-bottom: 8px;
+        }
+        input, select, textarea {
+            width: 100%;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 18px;
+            padding: 12px 16px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            transition: 0.2s;
+        }
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #2c6280;
+            box-shadow: 0 0 0 3px rgba(44,98,128,0.1);
+        }
+
+        /* Difficulty Toggle */
+        .difficulty-group {
+            display: flex;
+            gap: 12px;
+            margin: 8px 0 12px;
+        }
+        .diff-option {
+            flex: 1;
+            text-align: center;
+            padding: 8px 0;
+            border-radius: 40px;
+            background: #f1f5f9;
+            font-weight: 600;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: 0.2s;
+            color: #334155;
+        }
+        .diff-option.active[data-diff="low"] { background: #10b981; color: white; }
+        .diff-option.active[data-diff="medium"] { background: #f59e0b; color: white; }
+        .diff-option.active[data-diff="tuff"] { background: #ef4444; color: white; }
+
+        button {
+            background: #1e3a5f;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 40px;
+            font-weight: 600;
+            color: white;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 0.85rem;
+        }
+        button.secondary {
+            background: #e2e8f0;
+            color: #1e293b;
+        }
+        button:hover { transform: translateY(-1px); filter: brightness(1.02); box-shadow: 0 5px 12px rgba(0,0,0,0.05); }
+
+        /* Stopwatch Panel (Professional) */
+        .stopwatch-module {
+            background: linear-gradient(145deg, #1a2a3a, #0f1e2c);
+            border-radius: 28px;
+            padding: 24px 20px;
+            text-align: center;
+            color: white;
+            margin-bottom: 24px;
+        }
+        .stopwatch-display {
+            font-size: 3.6rem;
+            font-weight: 700;
+            font-family: 'Inter', monospace;
+            letter-spacing: 3px;
+            background: rgba(255,255,255,0.05);
+            padding: 16px;
+            border-radius: 60px;
+            margin: 16px 0;
+            backdrop-filter: blur(4px);
+        }
+        .stopwatch-controls {
+            display: flex;
+            gap: 14px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .stopwatch-btn {
+            background: rgba(255,255,255,0.12);
+            padding: 10px 24px;
+            border-radius: 40px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        .stopwatch-btn:hover { background: rgba(255,255,255,0.22); transform: translateY(-1px); }
+
+        /* Task List */
+        .task-scroll {
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+        .task-card {
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border-left: 4px solid;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+            transition: all 0.2s;
+        }
+        .task-title {
+            font-weight: 700;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .difficulty-badge {
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 4px 12px;
+            border-radius: 40px;
+        }
+        .badge-low { background: #d1fae5; color: #065f46; }
+        .badge-medium { background: #fed7aa; color: #92400e; }
+        .badge-tuff { background: #fee2e2; color: #b91c1c; }
+
+        /* AI Chat */
+        .chat-container {
+            background: #1e2a36;
+            border-radius: 24px;
+            padding: 18px;
+            height: 380px;
+            display: flex;
+            flex-direction: column;
+        }
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 12px;
+            font-size: 0.8rem;
+        }
+        .bot-message, .user-message {
+            margin-bottom: 12px;
+            max-width: 90%;
+        }
+        .bot-message { background: #2d3e4e; padding: 8px 14px; border-radius: 20px; color: #eef2ff; display: inline-block; }
+        .user-message { text-align: right; color: #bbd7fb; }
+
+        /* Pro Tip Bar */
+        .pro-tip-bar {
+            background: #eef2ff;
+            border-radius: 20px;
+            padding: 14px 20px;
+            margin-top: 18px;
+            font-weight: 500;
+            font-size: 0.85rem;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            font-size: 0.7rem;
+            color: #5b6e8c;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 24px;
+        }
+        ::-webkit-scrollbar { width: 4px; }
+        .error-feedback { color: #ef4444; font-size: 0.7rem; margin-top: 6px; display: none; }
+        .success-feedback { color: #10b981; font-size: 0.7rem; margin-top: 6px; display: none; }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <div class="header">
+        <div class="logo-area">
+            <h1><i class="fas fa-microchip"></i> Apna Study Lab</h1>
+            <p>AI-powered · adaptive learning · stopwatch analytics</p>
+        </div>
+        <div class="status-chip"><i class="fas fa-brain"></i> AI Nexus Active <div class="pulse-dot"></div></div>
+    </div>
+
+    <div class="dashboard-grid">
+        <!-- Column 1: Task Creation + Stopwatch -->
+        <div>
+            <div class="card">
+                <div class="card-header"><i class="fas fa-plus-circle"></i> Create Study Block</div>
+                <div class="input-field"><label>Subject / Domain</label><input type="text" id="subjectInput" placeholder="e.g., Machine Learning, Calculus, DSA"></div>
+                <div class="input-field"><label>Topic Description</label><textarea rows="2" id="topicInput" placeholder="Specific concept or task"></textarea></div>
+                <div class="input-field"><label>⏱️ Estimated Hours</label><input type="number" id="hoursInput" value="1.5" step="0.5" min="0.5"></div>
+                <div class="input-field"><label>Difficulty Level</label><div class="difficulty-group" id="difficultyGroup"><div class="diff-option" data-diff="low">🌿 Low</div><div class="diff-option active" data-diff="medium">⚡ Medium</div><div class="diff-option" data-diff="tuff">🔥 Tuff</div></div></div>
+                <div style="display: flex; gap: 12px; flex-wrap: wrap;"><button id="addTaskBtn"><i class="fas fa-feather-alt"></i> AI + Add Task</button><button id="clearTasksBtn" class="secondary"><i class="fas fa-trash-alt"></i> Reset All</button></div>
+                <div id="addErrorMsg" class="error-feedback"></div>
+                <div id="addSuccessMsg" class="success-feedback"></div>
+            </div>
+            <!-- Professional Stopwatch -->
+            <div class="stopwatch-module">
+                <i class="fas fa-stopwatch" style="opacity: 0.9;"></i> <strong>Study Stopwatch · Track Focus</strong>
+                <div class="stopwatch-display" id="stopwatchDisplay">00:00:00</div>
+                <div class="stopwatch-controls">
+                    <button class="stopwatch-btn" id="startStopwatchBtn"><i class="fas fa-play"></i> Start</button>
+                    <button class="stopwatch-btn" id="pauseStopwatchBtn"><i class="fas fa-pause"></i> Pause</button>
+                    <button class="stopwatch-btn" id="resetStopwatchBtn"><i class="fas fa-sync-alt"></i> Reset</button>
+                    <button class="stopwatch-btn" id="logStopwatchBtn"><i class="fas fa-bookmark"></i> Log Session</button>
+                </div>
+                <div style="margin-top: 14px; font-size: 0.7rem;" id="stopwatchHint">Track your study sessions — logs added to AI insights</div>
+            </div>
+        </div>
+
+        <!-- Column 2: Task List + Pro Tips -->
+        <div class="card">
+            <div class="card-header"><i class="fas fa-list-check"></i> Smart Queue</div>
+            <div class="task-scroll" id="taskListContainer"></div>
+            <div class="pro-tip-bar" id="proTipBox"><i class="fas fa-lightbulb"></i> <span id="tipText">Loading intelligence...</span></div>
+        </div>
+
+        <!-- Column 3: AI Chat + Analytics -->
+        <div>
+            <div class="chat-container">
+                <div style="display: flex; gap: 8px; margin-bottom: 12px;"><i class="fas fa-comment-dots"></i> <strong>Athena Assistant</strong></div>
+                <div class="chat-messages" id="chatMessages"><div class="bot-message">🤖 Namaste! I'm your AI study coach. Ask me anything — study techniques, stopwatch tips, or difficulty advice.</div></div>
+                <div style="display: flex; gap: 10px;"><input type="text" id="chatInput" placeholder="e.g., how to focus on tuff tasks?"><button id="sendChatBtn"><i class="fas fa-paper-plane"></i></button></div>
+            </div>
+            <div class="card" style="margin-top: 20px; padding: 18px;">
+                <div style="display: flex; justify-content: space-between;">
+                    <div><span style="font-size: 2rem; font-weight:800;" id="totalTasksStat">0</span><br>Total</div>
+                    <div><span style="font-size: 2rem; font-weight:800;" id="completedStat">0</span><br>Completed</div>
+                    <div><span style="font-size: 2rem; font-weight:800;" id="totalHoursStat">0</span><br>Est. Hours</div>
+                </div>
+                <canvas id="progressChart" style="height: 110px; margin-top: 12px;"></canvas>
+            </div>
+        </div>
+    </div>
+    <footer>⚡ Apna Study Lab — AI Difficulty-Adaptive Engine | Stopwatch with session logging | Smart Knowledge Assistant</footer>
+</div>
+
+<script>
+    // ---------- DATA MODEL ----------
+    let tasks = [];          // { id, subject, topic, hours, difficulty, completed }
+    let chartInstance = null;
+    let selectedDifficulty = "medium";
+
+    // Stopwatch variables
+    let stopwatchSeconds = 0;
+    let stopwatchInterval = null;
+    let isStopwatchRunning = false;
+
+    // DOM Elements
+    const subjectInput = document.getElementById('subjectInput');
+    const topicInput = document.getElementById('topicInput');
+    const hoursInput = document.getElementById('hoursInput');
+    const addBtn = document.getElementById('addTaskBtn');
+    const clearBtn = document.getElementById('clearTasksBtn');
+    const taskContainer = document.getElementById('taskListContainer');
+    const totalTasksSpan = document.getElementById('totalTasksStat');
+    const completedSpan = document.getElementById('completedStat');
+    const totalHoursSpan = document.getElementById('totalHoursStat');
+    const proTipSpan = document.getElementById('tipText');
+    const chatMessagesDiv = document.getElementById('chatMessages');
+    const chatInput = document.getElementById('chatInput');
+    const sendChatBtn = document.getElementById('sendChatBtn');
+    const stopwatchDisplay = document.getElementById('stopwatchDisplay');
+    const addErrorMsg = document.getElementById('addErrorMsg');
+    const addSuccessMsg = document.getElementById('addSuccessMsg');
+
+    // Difficulty Selector
+    document.querySelectorAll('.diff-option').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.diff-option').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            selectedDifficulty = btn.getAttribute('data-diff');
+        });
+    });
+
+    // Stopwatch Functions
+    function updateStopwatchDisplay() {
+        let hours = Math.floor(stopwatchSeconds / 3600);
+        let minutes = Math.floor((stopwatchSeconds % 3600) / 60);
+        let secs = stopwatchSeconds % 60;
+        stopwatchDisplay.innerText = `${hours.toString().padStart(2,'0')}:${minutes.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`;
+    }
+    function startStopwatch() {
+        if (stopwatchInterval) clearInterval(stopwatchInterval);
+        isStopwatchRunning = true;
+        stopwatchInterval = setInterval(() => {
+            if (isStopwatchRunning) {
+                stopwatchSeconds++;
+                updateStopwatchDisplay();
+            }
+        }, 1000);
+    }
+    function pauseStopwatch() {
+        isStopwatchRunning = false;
+        if (stopwatchInterval) clearInterval(stopwatchInterval);
+        stopwatchInterval = null;
+    }
+    function resetStopwatch() {
+        pauseStopwatch();
+        stopwatchSeconds = 0;
+        updateStopwatchDisplay();
+    }
+    function logStopwatchSession() {
+        let totalSecs = stopwatchSeconds;
+        if (totalSecs < 5) {
+            addChatMessage(`⏱️ You tracked ${totalSecs} seconds. Start the stopwatch during study to measure deep work!`, false);
+        } else {
+            let hoursTracked = (totalSecs / 3600).toFixed(2);
+            let msg = `📊 Session logged: ${formatTimeFromSeconds(totalSecs)} of focused study. Amazing consistency! AI recommends applying this momentum to pending tasks.`;
+            addChatMessage(msg, false);
+            if(tasks.filter(t => !t.completed).length > 0) {
+                addChatMessage(`💡 You have ${tasks.filter(t => !t.completed).length} pending tasks. Use the stopwatch for each one!`, false);
+            }
+        }
+    }
+    function formatTimeFromSeconds(secs) {
+        let h = Math.floor(secs / 3600);
+        let m = Math.floor((secs % 3600) / 60);
+        let s = secs % 60;
+        return `${h}h ${m}m ${s}s`;
+    }
+
+    document.getElementById('startStopwatchBtn').addEventListener('click', startStopwatch);
+    document.getElementById('pauseStopwatchBtn').addEventListener('click', pauseStopwatch);
+    document.getElementById('resetStopwatchBtn').addEventListener('click', resetStopwatch);
+    document.getElementById('logStopwatchBtn').addEventListener('click', logStopwatchSession);
+
+    // Storage
+    function saveToLocal() { localStorage.setItem('apna_study_lab_tasks', JSON.stringify(tasks)); }
+    function loadFromLocal() { 
+        const stored = localStorage.getItem('apna_study_lab_tasks'); 
+        if(stored) tasks = JSON.parse(stored); 
+        else tasks = []; 
+        renderAll(); 
+    }
+
+    // Theme based on task difficulty majority
+    function applyDynamicTheme() {
+        if(!tasks.length) { document.body.className = 'theme-medium'; return; }
+        let low=0, med=0, tuff=0;
+        tasks.forEach(t => { if(t.difficulty === 'low') low++; else if(t.difficulty === 'medium') med++; else if(t.difficulty === 'tuff') tuff++; });
+        if(tuff > low && tuff >= med) document.body.className = 'theme-tuff';
+        else if(low > med && low >= tuff) document.body.className = 'theme-low';
+        else document.body.className = 'theme-medium';
+    }
+
+    // ADD TASK (Fixed - reliable task addition)
+    function addTask() {
+        addErrorMsg.style.display = 'none';
+        addSuccessMsg.style.display = 'none';
+        
+        const subject = subjectInput.value.trim();
+        const topic = topicInput.value.trim();
+        const hours = parseFloat(hoursInput.value);
+        
+        if (!subject) {
+            addErrorMsg.innerText = "❌ Subject is required";
+            addErrorMsg.style.display = 'block';
+            return;
+        }
+        if (!topic) {
+            addErrorMsg.innerText = "❌ Topic description is required";
+            addErrorMsg.style.display = 'block';
+            return;
+        }
+        if (isNaN(hours) || hours <= 0) {
+            addErrorMsg.innerText = "❌ Please enter a valid number of hours (>0)";
+            addErrorMsg.style.display = 'block';
+            return;
+        }
+        
+        const newTask = {
+            id: Date.now(),
+            subject: subject,
+            topic: topic,
+            hours: hours,
+            difficulty: selectedDifficulty,
+            completed: false,
+            createdAt: new Date().toISOString()
+        };
+        tasks.push(newTask);
+        saveToLocal();
+        
+        // Clear inputs
+        subjectInput.value = '';
+        topicInput.value = '';
+        hoursInput.value = '1.5';
+        
+        renderAll();
+        addChatMessage(`✅ Added "${topic}" as ${selectedDifficulty.toUpperCase()} priority. Estimated ${hours} hr(s).`, false);
+        
+        addSuccessMsg.innerText = "✓ Task added successfully!";
+        addSuccessMsg.style.display = 'block';
+        setTimeout(() => { addSuccessMsg.style.display = 'none'; }, 2000);
+    }
+    
+    function deleteTask(id) { tasks = tasks.filter(t => t.id !== id); saveToLocal(); renderAll(); }
+    function toggleComplete(id) { const task = tasks.find(t => t.id === id); if(task) task.completed = !task.completed; saveToLocal(); renderAll(); }
+    function clearAllTasks() { 
+        if(confirm("⚠️ Permanently delete all study tasks?")) { 
+            tasks = []; 
+            saveToLocal(); 
+            renderAll(); 
+            addChatMessage("All tasks have been reset. Start fresh with new study blocks!", false); 
+        } 
+    }
+
+    function renderTasks() {
+        if(tasks.length === 0) { 
+            taskContainer.innerHTML = `<div style="text-align:center; padding:30px; color:#6c86a3;">📌 No active tasks. Create a study block above.</div>`; 
+            return; 
+        }
+        let html = '';
+        tasks.forEach(task => {
+            let badgeClass = task.difficulty === 'low' ? 'badge-low' : (task.difficulty === 'medium' ? 'badge-medium' : 'badge-tuff');
+            let borderColor = task.difficulty === 'low' ? '#10b981' : (task.difficulty === 'medium' ? '#f59e0b' : '#ef4444');
+            html += `<div class="task-card" style="border-left-color: ${borderColor}; opacity: ${task.completed ? 0.65 : 1}">
+                        <div class="task-title"><span>📘 ${escapeHtml(task.subject)}</span><span class="difficulty-badge ${badgeClass}">${task.difficulty.toUpperCase()}</span></div>
+                        <div style="margin: 8px 0; font-size:0.85rem;">${escapeHtml(task.topic)} • ⏱️ ${task.hours} hrs</div>
+                        <div style="display: flex; justify-content: flex-end; gap: 18px;">
+                            <i class="fas ${task.completed ? 'fa-undo-alt' : 'fa-check-circle'}" style="cursor:pointer; color:${task.completed ? '#f97316' : '#10b981'}; font-size: 1.1rem;" onclick="window.toggleComplete(${task.id})"></i>
+                            <i class="fas fa-trash-alt" style="cursor:pointer; color:#ef4444; font-size: 1.1rem;" onclick="window.deleteTask(${task.id})"></i>
+                        </div>
+                        ${task.completed ? '<div style="font-size:0.7rem; margin-top:6px;">✅ Completed</div>' : ''}
+                    </div>`;
+        });
+        taskContainer.innerHTML = html;
+        // update stats and chart
+        let total = tasks.length, completedCount = tasks.filter(t => t.completed).length, totalHours = tasks.reduce((a,b)=> a + b.hours, 0);
+        totalTasksSpan.innerText = total; completedSpan.innerText = completedCount; totalHoursSpan.innerText = totalHours.toFixed(1);
+        if(chartInstance) chartInstance.destroy();
+        const ctx = document.getElementById('progressChart').getContext('2d');
+        chartInstance = new Chart(ctx, { type: 'doughnut', data: { labels: ['Completed', 'Pending'], datasets: [{ data: [completedCount, total - completedCount], backgroundColor: ['#2c6280', '#cbd5e1'], borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: true, cutout: '60%', plugins: { legend: { position: 'bottom', labels: { boxWidth: 8, font: { size: 10 } } } } } });
+        applyDynamicTheme();
+    }
+
+    // AI Chatbot
+    function addChatMessage(text, isUser = false) {
+        const div = document.createElement('div');
+        div.className = isUser ? 'user-message' : 'bot-message';
+        div.innerHTML = isUser ? `<strong>You:</strong> ${escapeHtml(text)}` : text;
+        chatMessagesDiv.appendChild(div);
+        chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight;
+        if(chatMessagesDiv.children.length > 45) chatMessagesDiv.removeChild(chatMessagesDiv.children[0]);
+    }
+    function processAIQuery(query) {
+        let q = query.toLowerCase();
+        if(q.includes('stopwatch') || q.includes('track time')) return "⏱️ Use the Study Stopwatch above! Start, pause, reset, and log sessions. Logged time adds to your productivity insights.";
+        if(q.includes('tip') || q.includes('advice')) return proTips[Math.floor(Math.random() * proTips.length)];
+        if(q.includes('tuff') || q.includes('hard')) return "🔥 Break Tuff tasks into 2–3 sprints and use stopwatch to track time spent on each sub-task.";
+        if(q.includes('low') && q.includes('medium')) return "Balance: Low (quick review), Medium (concept mastery), Tuff (problem-solving). Adjust difficulty slider.";
+        if(q.includes('recall') || q.includes('memory')) return "🧠 Flashcards + self-testing increases retention by 150%. Combine with stopwatch timed drills.";
+        if(q.includes('procrastination')) return "⏳ 2-min rule: just start for 2 minutes. Use the stopwatch to build momentum.";
+        let pendingTuff = tasks.filter(t => !t.completed && t.difficulty === 'tuff').length;
+        if(pendingTuff > 0) return `📊 You have ${pendingTuff} Tuff pending. Use stopwatch to track focus on one Tuff task now.`;
+        let totalPending = tasks.filter(t => !t.completed).length;
+        if(totalPending > 0) return `🎯 ${totalPending} tasks remaining. Stopwatch can help you measure real focus duration. Try a 25-min sprint.`;
+        return "✨ I suggest using the Stopwatch to log deep work sessions. Ask me about study techniques like Pomodoro, active recall, or time blocking.";
+    }
+    function sendMessage() { 
+        let msg = chatInput.value.trim(); 
+        if(!msg) return; 
+        addChatMessage(msg, true); 
+        chatInput.value = ''; 
+        setTimeout(() => { 
+            let reply = processAIQuery(msg); 
+            addChatMessage(reply, false); 
+        }, 180); 
+    }
+    sendChatBtn.addEventListener('click', sendMessage);
+    chatInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') sendMessage(); });
+
+    function renderAll() { renderTasks(); }
+
+    // Pro tips rotation
+    const proTips = [
+        "🧠 Spaced repetition boosts long-term retention by 200%.",
+        "⚡ Stopwatch helps measure deep work — track every session.",
+        "📝 Active recall > passive reading — test yourself.",
+        "🔥 For 'Tuff' tasks, break into micro-sessions and log time.",
+        "🌿 Low difficulty? Use interleaving with other subjects.",
+        "🎯 Set specific goals before each study block.",
+        "💧 Hydration improves cognitive function by 15%.",
+        "📅 Consistent schedule builds automatic discipline.",
+        "✨ Log stopwatch sessions to visualize productive streaks.",
+        "🎯 Apna Study Lab: Your personal AI learning partner!"
+    ];
+    let tipIndex = 0;
+    setInterval(() => { tipIndex = (tipIndex + 1) % proTips.length; proTipSpan.innerText = proTips[tipIndex]; }, 7000);
+    
+    // Global handlers
+    window.toggleComplete = toggleComplete;
+    window.deleteTask = deleteTask;
+    addBtn.addEventListener('click', addTask);
+    clearBtn.addEventListener('click', clearAllTasks);
+    
+    function escapeHtml(str) { 
+        if(!str) return ''; 
+        return str.replace(/[&<>]/g, function(m) { if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m; }); 
+    }
+    
+    // Initial load
+    loadFromLocal();
+    proTipSpan.innerText = proTips[0];
+    resetStopwatch();
+</script>
+</body>
+</html>
